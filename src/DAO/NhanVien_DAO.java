@@ -14,6 +14,7 @@ import connectDB.ConnectDB;
 import entity.KhachHang;
 import entity.LoaiNhanVien;
 import entity.NhanVien;
+import entity.TaiKhoan;
 
 public class NhanVien_DAO {
 
@@ -71,12 +72,12 @@ public class NhanVien_DAO {
 			
 			if(rs.getBoolean(8) == false) {
 				Object[] o = { rs.getString(1), rs.getString(2), rs.getString(3),
-						rs.getString(4), rs.getString(5), rs.getString(6),"Nữ","Đang làm",rs.getString(9)};
+						rs.getString(4), rs.getString(5), rs.getString(6),"Đang làm","Nữ",rs.getString(9)};
 				tableModel.addRow(o);
 			}
 			else {
 				Object[] o = { rs.getString(1), rs.getString(2), rs.getString(3),
-						rs.getString(4), rs.getString(5), rs.getString(6),"Nam","Đang làm",rs.getString(9)};
+						rs.getString(4), rs.getString(5), rs.getString(6),"Đang làm","Nam",rs.getString(9)};
 				tableModel.addRow(o);
 			}
 		}
@@ -84,6 +85,8 @@ public class NhanVien_DAO {
 	}
 
 	public boolean themNV(NhanVien nv) {
+		TaiKhoan_DAO accountDao = new TaiKhoan_DAO();
+		accountDao.create(new TaiKhoan(nv, "123456"));
 		ConnectDB.getInstance();
 		Connection con = ConnectDB.getConnection();
 		PreparedStatement stmt = null;
@@ -233,12 +236,49 @@ public class NhanVien_DAO {
 
 		Statement statement = con.createStatement();
 		ResultSet rs = statement.executeQuery(sql);
-
 		while (rs.next()) {
-			Object[] o = { rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
-					rs.getString(6), rs.getString(7), rs.getString(8), rs.getString(9) };
-			tableModel.addRow(o);
+			
+			if(rs.getBoolean(8) == false) {
+				Object[] o = { rs.getString(1), rs.getString(2), rs.getString(3),
+						rs.getString(4), rs.getString(5), rs.getString(6),"Đang làm","Nữ", rs.getString(9)};
+				tableModel.addRow(o);
+			}
+			else {
+				Object[] o = { rs.getString(1), rs.getString(2), rs.getString(3),
+						rs.getString(4), rs.getString(5), rs.getString(6),"Đang làm","Nam",rs.getString(9) };
+				tableModel.addRow(o);
+			};
 		}
 		return tableModel;
 	}
+	
+	public boolean xoaNV(String maNV) {
+		// TODO Auto-generated method stub
+		ConnectDB.getInstance();
+		Connection con = ConnectDB.getConnection();
+		PreparedStatement stmt = null;
+		int n = 0;
+		try {
+			stmt = con.prepareStatement("delete from NhanVien where maNV=?");
+			stmt.setString(1, maNV);
+			n = stmt.executeUpdate();
+			if(n==0) {
+				return true;
+			}
+			else
+				return false;
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return false;
+		}finally {
+			try {
+				stmt.close();
+			} catch (SQLException e) { e.printStackTrace();
+				// TODO: handle exception
+			}
+		}
+	}
+	
 }

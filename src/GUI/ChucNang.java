@@ -79,7 +79,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		pnQLThongKe = new JPanel();
 		pnQLThongKe = new QuanLyThongKe();
 		pnQLHoaDon = new JPanel();
-		pnQLHoaDon = new MenuHoaDon();
+		pnQLHoaDon = new MenuHoaDon(maNhanVien);
 		pnQLNhaCungCap = new JPanel();
 		pnQLNhaCungCap = new QuanLyNhaCungCap();
 		pnTrangChu = new JPanel();
@@ -89,10 +89,10 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		JPanel pnNorth = new JPanel();
 		
 		pnNorth.setLayout(new BorderLayout());
-		pnNorth.setBackground(Color.cyan);
+		pnNorth.setBackground(Color.PINK);
 		
 		JPanel pnTieuDe = new JPanel();
-		pnTieuDe.setBackground(new Color(204, 255, 255));
+		pnTieuDe.setBackground(new Color(255, 221, 226));
 		pnTieuDe.setLayout(new FlowLayout(FlowLayout.CENTER));
 		JLabel lblTieuDe = new JLabel("Quản Lý Cửa Hàng Quần Áo");
 		Font font =new Font("Arial",Font.BOLD,25);
@@ -101,10 +101,10 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		pnTieuDe.add(lblTieuDe);
 		
 		JPanel pnTTNhanVien = new JPanel();
-		pnTTNhanVien.setBackground(new Color(204, 255, 255));
+		pnTTNhanVien.setBackground(new Color(255, 221, 226));
 		pnTTNhanVien.setLayout(new GridLayout(2,1));
 		JPanel pnMaNV = new JPanel();
-		pnMaNV.setBackground(new Color(204, 255, 255));
+		pnMaNV.setBackground(new Color(255, 221, 226));
 		JLabel lblMaNV = new JLabel("Mã nhân viên: ");
 		txtMaNV = new JTextField(10);
 		txtMaNV.setText(maNhanVien);
@@ -113,7 +113,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		pnMaNV.add(lblMaNV);
 		pnMaNV.add(txtMaNV);
 		JPanel pnTenNV = new JPanel();
-		pnTenNV.setBackground(new Color(204, 255, 255));
+		pnTenNV.setBackground(new Color(255, 221, 226));
 		JLabel lblTenNV = new JLabel("Tên nhân viên: ");
 		txtTenNV = new JTextField(10);
 		txtTenNV.setText(nhanVien_dao.LayNhanVienTheoMa(maNhanVien).getTenNV().toString());
@@ -125,7 +125,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		lblMaNV.setPreferredSize(lblTenNV.getPreferredSize());
 		pnTTNhanVien.add(pnMaNV);
 		pnTTNhanVien.add(pnTenNV);
-		pnTTNhanVien.setBackground(Color.CYAN);
+		pnTTNhanVien.setBackground(Color.PINK);
 		pnNorth.add(pnTTNhanVien,BorderLayout.EAST);
 		pnNorth.add(pnTieuDe,BorderLayout.CENTER);
 		pnNorth.add(pnTieuDe,BorderLayout.CENTER);
@@ -141,27 +141,27 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		
 		//WEST
 		pnWest = new JPanel();
-		pnWest.setBackground(new Color(204, 255, 255));
+		pnWest.setBackground(new Color(255, 221, 226));
 		pnWest.setLayout(new BorderLayout());
 		JLabel iconLabel = new JLabel(new ImageIcon("Icon/menu.png"));
 		btnChucNang = new JButton("");
 		btnChucNang.setLayout(new BorderLayout());
 		btnChucNang.add(iconLabel,BorderLayout.CENTER);//Vinh 29-5
 		btnChucNang.setPreferredSize(new Dimension(50,50));
-		btnChucNang.setBackground(new Color(204, 255, 255));
+		btnChucNang.setBackground(new Color(255, 221, 226));
 		btnChucNang.setBorderPainted(false);
 		btnChucNang.setFocusPainted(false);
 		btnChucNang.setContentAreaFilled(false);
 		btnChucNang.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		
-		lblLogo = new JLabel(ResizeImage("Icon/sun.png"));
+		lblLogo = new JLabel(ResizeImage("Icon/Sun.png"));
 		lblLogo.setPreferredSize(new Dimension(140,50));
 		JPanel pnChucNang = new JPanel();
 		pnChucNang.setLayout(new FlowLayout(FlowLayout.LEFT));
 		pnChucNang.setPreferredSize(pnTTNhanVien.getPreferredSize());
 		pnChucNang.add(btnChucNang);
 		pnChucNang.add(lblLogo);
-		pnChucNang.setBackground(new Color(204, 255, 255));
+		pnChucNang.setBackground(new Color(255, 221, 226));
 		pnNorth.add(pnChucNang,BorderLayout.WEST);
 		
 		JLabel iconLabel1 = new JLabel(new ImageIcon("Icon/qlkh.png"));
@@ -193,7 +193,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		btnQLSanPham.add(iconLabel4,BorderLayout.WEST);
 		btnQLSanPham.add(nButton4,BorderLayout.CENTER);
 		
-		JLabel iconLabel5 = new JLabel(new ImageIcon("Icon/ticket1.png"));
+		JLabel iconLabel5 = new JLabel(new ImageIcon("Icon/ticket.png"));
 		nButton5 = new JLabel("Đặt hàng", SwingConstants.CENTER);
 		btnQLHoaDon = new JButton("");
 		btnQLHoaDon.setLayout(new BorderLayout());
@@ -201,7 +201,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		btnQLHoaDon.add(nButton5,BorderLayout.CENTER);
 		
 		JLabel iconLabel6 = new JLabel(new ImageIcon("Icon/QLDD5.png"));
-		nButton6 = new JLabel("Quản lý nhà cung cấp", SwingConstants.CENTER);
+		nButton6 = new JLabel("Nhà cung cấp", SwingConstants.CENTER);
 		btnQLNhaCungCap = new JButton("");
 		btnQLNhaCungCap.setLayout(new BorderLayout());
 		btnQLNhaCungCap.add(iconLabel6,BorderLayout.WEST);
@@ -211,7 +211,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		//Na
 		
 		//Nam
-		JLabel iconLabel8 = new JLabel(new ImageIcon("Icon/log-out.png"));
+		JLabel iconLabel8 = new JLabel(new ImageIcon("Icon/logout-icon.png"));
 		nButton8 = new JLabel("Đăng xuất", SwingConstants.CENTER);
 		nButton8.setForeground(Color.WHITE);
 		btnDangXuat = new JButton("");
@@ -219,7 +219,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		btnDangXuat.add(iconLabel8,BorderLayout.WEST);
 		btnDangXuat.add(nButton8,BorderLayout.CENTER);
 		//Thái
-		JLabel iconLabel9 = new JLabel(new ImageIcon("Icon/house.png"));
+		JLabel iconLabel9 = new JLabel(new ImageIcon("Icon/Sun.png"));
 		nButton9 = new JLabel("Trang Chủ", SwingConstants.CENTER);
 		btnTrangChu = new JButton("");
 		btnTrangChu.setLayout(new BorderLayout());
@@ -240,7 +240,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		//Nam
 		btnDangXuat.setBackground(new Color(255, 51, 0));
 		JPanel pnCN = new JPanel();
-		pnCN.setBackground(new Color(204, 255, 255));
+		pnCN.setBackground(new Color(255, 221, 226));
 		pnCN.add(btnTrangChu);
 		pnCN.add(btnQLHoaDon);
 		pnCN.add(btnQLSanPham);
@@ -252,7 +252,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		//Nam
 		JPanel pnDX = new JPanel();
 		pnDX.add(btnDangXuat);
-		pnDX.setBackground(new Color(204, 255, 255));
+		pnDX.setBackground(new Color(255, 221, 226));
 		pnWest.add(pnCN, BorderLayout.CENTER);
 		pnWest.add(pnDX,BorderLayout.SOUTH);
 		pnWest.setPreferredSize(new Dimension(200,400));
@@ -499,7 +499,7 @@ public class ChucNang extends JFrame implements ActionListener, MouseListener {
 		//Vinh
 		Object obj = e.getSource();
 		 if(obj.equals(lblLogo)) {
-			 btnTrangChu.setBackground(Color.CYAN);
+			 btnTrangChu.setBackground(Color.PINK);
 				btnQLNV.setBackground(Color.WHITE);
 				btnQLSanPham.setBackground(Color.WHITE);
 				btnThongKe.setBackground(Color.WHITE);

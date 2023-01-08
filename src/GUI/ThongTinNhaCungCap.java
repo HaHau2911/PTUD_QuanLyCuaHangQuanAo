@@ -108,7 +108,7 @@ public class ThongTinNhaCungCap extends JFrame implements ActionListener{
 		lblNoiSX.setPreferredSize(lblTenNCC.getPreferredSize());
 		
 		btnLamMoi = new JButton("Làm mới");
-		btnLamMoi.setIcon(new ImageIcon("Icon/xoarong.png"));
+		btnLamMoi.setIcon(new ImageIcon("Icon/load.png"));
 		btnLuu = new JButton("Lưu");
 		btnLuu.setIcon(new ImageIcon("Icon/save.png"));
 		btnThoat = new JButton("Thoát");
@@ -128,9 +128,9 @@ public class ThongTinNhaCungCap extends JFrame implements ActionListener{
 			txtNoiSX.setText("");
 		}
 		else {
-			txtMaNCC.setText(nhacungcap.getMaNCC());
-			txtTenNCC.setText(nhacungcap.getTenNCC());
-			txtNoiSX.setText(nhacungcap.getNoiSX());
+			txtMaNCC.setText(ncc.getMaNCC());
+			txtTenNCC.setText(ncc.getTenNCC());
+			txtNoiSX.setText(ncc.getNoiSX());
 		}
 		btnLuu.addActionListener(new ActionListener() {
 			@Override
@@ -138,9 +138,9 @@ public class ThongTinNhaCungCap extends JFrame implements ActionListener{
 				// TODO Auto-generated method stub
 				if(flag == true) {
 					if(validData()) {
-						String maNCC = txtMaNCC.getText().trim();
-						String tenNCC = txtTenNCC.getText().trim();
-						String NoiSX = txtNoiSX.getText().trim();
+						String maNCC = txtMaNCC.getText();
+						String tenNCC = txtTenNCC.getText();
+						String NoiSX = txtNoiSX.getText();
 						nhacungcap = new NhaCungCap(maNCC, tenNCC, NoiSX);
 						
 						if(ncc_dao.themNCC(nhacungcap))
@@ -158,9 +158,9 @@ public class ThongTinNhaCungCap extends JFrame implements ActionListener{
 				}
 				else if (flag == false ) {
 					if(qlncc.row>=0) {
-						String maNCC = txtMaNCC.getText().toString();
-						String tenNCC = txtTenNCC.getText().toString();
-						String NoiSX = txtNoiSX.getText().toString();
+						String maNCC = txtMaNCC.getText();
+						String tenNCC = txtTenNCC.getText();
+						String NoiSX = txtNoiSX.getText();
 						nhacungcap = new NhaCungCap(maNCC, tenNCC, NoiSX);
 						if(ncc_dao.update(nhacungcap)) {
 							qlncc.table.setValueAt(txtTenNCC.getText(), qlncc.row, 1);
@@ -174,6 +174,7 @@ public class ThongTinNhaCungCap extends JFrame implements ActionListener{
 		});
 	}
 	
+	
 	public static void main(String[] args) {
 		
 	}
@@ -183,6 +184,7 @@ public class ThongTinNhaCungCap extends JFrame implements ActionListener{
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
 		if (o.equals(btnLamMoi)) {
+			txtMaNCC.setText("");
 			txtTenNCC.setText("");
 			txtNoiSX.setText("");
 		}

@@ -12,12 +12,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -35,10 +37,13 @@ public class UI_ThongTinKhachHang extends JPanel  implements ActionListener, Mou
 	DefaultTableModel modeltable;
 	JTable table;
 	JTextField txtTim;
-	JButton btnTim, btnThem, btnSua, btnLoad, btnThoat;
-	UI_KhachHang ui;
+	JButton btnTim, btnThem, btnSua, btnLoad, btnThoat,btnXoa;
 	KhachHang kh;
 	int row;
+	ArrayList<KhachHang> listKH;
+	KhachHang khachhang;
+	KhachHang_DAO kh_dao;
+	
 	public UI_ThongTinKhachHang() {
 		
 		
@@ -48,6 +53,8 @@ public class UI_ThongTinKhachHang extends JPanel  implements ActionListener, Mou
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		kh_dao = new KhachHang_DAO();
+		
 		//setBackground(Color.YELLOW);
 		setLayout(new BorderLayout());
 		
@@ -87,23 +94,30 @@ public class UI_ThongTinKhachHang extends JPanel  implements ActionListener, Mou
 	//	pnLeft.add(btnTim);
 			//RIGHT
 		btnThem = new JButton("Thêm");
-		btnThem.setIcon(new ImageIcon("Icon/add.png"));
+		btnThem.setIcon(new ImageIcon("Icon/them.png"));
 		btnSua = new JButton("Sửa");
-		btnSua.setIcon(new ImageIcon("Icon/sua.png"));
+		btnSua.setIcon(new ImageIcon("Icon/repair.png"));
+		btnXoa = new JButton("Xoá");
+		btnXoa.setIcon(new ImageIcon("Icon/xoarong.png"));
 		btnLoad = new JButton("Load");
-		btnLoad.setIcon(new ImageIcon("Icon/open1.png"));
+		btnLoad.setIcon(new ImageIcon("Icon/load.png"));
 		btnThoat = new JButton("Thoát");
 		btnThoat.setIcon(new ImageIcon("Icon/thoat.png"));
 		pnRight.add(btnThem);
 		pnRight.add(btnSua);
+		pnRight.add(btnXoa);
 		pnRight.add(btnLoad);
 		pnRight.add(btnThoat);
 		pnSouth.add(sp);
 		
 		btnThem.addActionListener(this);
 		btnSua.addActionListener(this);
+		btnXoa.addActionListener(this);
 		btnLoad.addActionListener(this);
 		btnThoat.addActionListener(this);
+		
+		table.addMouseListener(this);
+		modeltable.setRowCount(0);
 		
 	
 	txtTim.addKeyListener(new KeyAdapter() {
@@ -160,15 +174,57 @@ public class UI_ThongTinKhachHang extends JPanel  implements ActionListener, Mou
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
 		if(o.equals(btnThem)) {
-			new UI_KhachHang().setVisible(true);
+			btnThem.setBackground(new Color(153, 255, 153));				//ĐÃ SỬA
+			btnThem.setForeground(Color.BLACK);
+			btnLoad.setBackground(null);				//ĐÃ SỬA
+			btnSua.setBackground(null);	
+			btnXoa.setBackground(null);	//ĐÃ SỬA
+			btnThoat.setBackground(null);
+			new ThongTinKhachHang(kh, true).setVisible(true);
 		}
 		else if(o.equals(btnSua)) {
+			btnSua.setBackground(new Color(153, 255, 153));			//ĐÃ SỬA
+			btnLoad.setBackground(null);				//ĐÃ SỬA
+			btnThem.setBackground(null);	
+			btnXoa.setBackground(null);	//ĐÃ SỬA
+			btnThoat.setBackground(null);
 			new ThongTinKhachHang(kh, false).setVisible(true);
 			
 		}
+		else if(o.equals(btnXoa)) {
+			btnXoa.setBackground(new Color(153, 255, 153));	
+			
+			int r =  table.getSelectedRow();
+			if (r == -1) {
+				JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng cần xóa !!");
+				return;
+			}
+			int result = JOptionPane.showConfirmDialog(this,"Bạn có chắc sẽ xóa dòng này không !!","Cảnh báo",
+					JOptionPane.YES_NO_OPTION,JOptionPane.WARNING_MESSAGE);
+			if (result ==0) {
+				String maKH = modeltable.getValueAt(r, 0).toString();
+				ArrayList<KhachHang> listkh = kh_dao.LayHetKhachHang();
+				for(KhachHang kh : listkh) {
+					if (kh.getMaKH().equalsIgnoreCase(maKH)) {
+							modeltable.removeRow(r);
+							try {
+								kh_dao.xoaKH(maKH);
+							} catch (SQLException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+					}
+				}
+			}
+			
+		}
+		
 		else if(o.equals(btnThoat)) {
-			setVisible(false);
-			dispose();
+			btnThoat.setBackground(new Color(153, 255, 153));
+			int kt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn thoát không","Thông báo",JOptionPane.YES_NO_OPTION);
+			if(kt == JOptionPane.YES_OPTION) {				//ĐÃ SỬA
+				System.exit(0);
+			}
 		}
 		else if(o.equals(btnLoad)) {
 			KhachHang_DAO dao_kh = new KhachHang_DAO();
@@ -190,6 +246,27 @@ public class UI_ThongTinKhachHang extends JPanel  implements ActionListener, Mou
 		// TODO Auto-generated method stub
 		
 	}
+	
+	private void xoahetDLTrongTable() {
+		// TODO Auto-generated method stub
+		DefaultTableModel dtm = (DefaultTableModel) table.getModel();
+		dtm.getDataVector().removeAllElements();
+	}
+	
+	private void DocDuLieuDataBaseVaoTable() {
+		// TODO Auto-generated method stub
+		modeltable.setRowCount(0);
+		table.removeAll();
+		listKH	= kh_dao.LayHetKhachHang();
+		for(KhachHang kh : listKH) {
+			modeltable.addRow(new Object[] {
+					kh.getMaKH(), kh.getTenKH(), kh.getEmail(), kh.getDiaChi(), kh.getSoDT(), kh.getCmnd(), kh.getGioiTinh()
+			});	
+		}
+		
+	}
+	
+	
 	private void timKH() throws SQLException{
 		KhachHang_DAO dao_kh= new KhachHang_DAO();
 		modeltable = dao_kh.timKiem("%"+txtTim.getText()+"%", "%"+txtTim.getText()+"%");
@@ -210,6 +287,7 @@ public class UI_ThongTinKhachHang extends JPanel  implements ActionListener, Mou
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
 		row = table.getSelectedRow();
+		kh = new KhachHang();
 		kh.setMaKH(table.getValueAt(row, 0).toString());
 		kh.setTenKH(table.getValueAt(row, 1).toString());
 		kh.setEmail(table.getValueAt(row, 2).toString());
