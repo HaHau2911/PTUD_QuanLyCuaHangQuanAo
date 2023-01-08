@@ -79,7 +79,7 @@ public class GUI_DangNhapNV extends JFrame{
 			e.printStackTrace();
 		}
 		TaiKhoan_DAO dao_tk = new TaiKhoan_DAO();
-		setLayout(new BorderLayout());
+		getContentPane().setLayout(new BorderLayout());
 		setTitle("DN");
 		setDefaultCloseOperation(this.DISPOSE_ON_CLOSE);	
 		setSize(500,500);
@@ -89,14 +89,14 @@ public class GUI_DangNhapNV extends JFrame{
 
 		lblAnh.setIcon(new ImageIcon("Icon/User-Administrator-Red-icon.png"));
 		pnNorth.add(lblAnh);
-		add(pnNorth,BorderLayout.NORTH);
+		getContentPane().add(pnNorth,BorderLayout.NORTH);
 		 pnNorth = new JPanel() { };
 			
 			lblAnh = new JLabel("");
 
 			lblAnh.setIcon(new ImageIcon("Icon/User-Administrator-Red-icon.png"));
 			pnNorth.add(lblAnh);
-			add(pnNorth,BorderLayout.NORTH);
+			getContentPane().add(pnNorth,BorderLayout.NORTH);
 		
 		
 			JPanel pnCenter = new JPanel();
@@ -107,7 +107,7 @@ public class GUI_DangNhapNV extends JFrame{
 			pnThongTin.setLayout(new BoxLayout(pnThongTin, BoxLayout.Y_AXIS));
 			pnCenter.add(pnThongTin);
 			
-			add(pnCenter,BorderLayout.CENTER);
+			getContentPane().add(pnCenter,BorderLayout.CENTER);
 			
 			JPanel pnAo = new JPanel();
 			pnThongTin.add(pnAo);

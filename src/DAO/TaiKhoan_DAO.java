@@ -67,7 +67,7 @@ public class TaiKhoan_DAO {
 		int n = 0;
 		try {
 			stmt = con.prepareStatement("insert into TaiKhoan values (?,?)");
-			stmt.setString(1, tk.getNhanVien().getMaNV());
+			stmt.setString(1, tk.getMaNV().getMaNV());
 			stmt.setString(2, tk.getPass());
 
 			n = stmt.executeUpdate();

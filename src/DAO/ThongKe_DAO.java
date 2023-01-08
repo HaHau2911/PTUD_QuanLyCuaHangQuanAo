@@ -53,6 +53,7 @@ public class ThongKe_DAO {
 	public int getGiaHD(String maHD) {
 		int gia = 0;
 		try {
+			
 			ConnectDB.getInstance();
 			Connection con = ConnectDB.getConnection();	
 			String sql = "SELECT tonggia = SanPham.gia*ChiTietHoaDon.soLuong\r\n"
@@ -80,23 +81,19 @@ public class ThongKe_DAO {
 		try {
 			ConnectDB.getInstance();
 			Connection con = ConnectDB.getConnection();	
-			String sql =  "SELECT  HoaDon.maHD, ChiTietHoaDon.maHD AS Expr1, HoaDon.ngayLap, \r\n"
-					+ "                         HoaDon.ngayLap\r\n"
-					+ "  FROM ChiTietHoaDon INNER JOIN\r\n"
-					+ "  HoaDon ON ChiTietHoaDon.maHD = HoaDon.maHD INNER JOIN\r\n"
-					+ "  KhachHang ON HoaDon.maKH= KhachHang.maKH INNER JOIN\r\n"
-					+ "  SanPham ON ChiTietHoaDon.maSP = SanPham.maSP INNER JOIN\r\n"
-					+ "where ngayLap > ? and ngayLap < ?";
+			String sql =  "SELECT * \r\n"
+					+ "FROM     HoaDon\r\n"
+					+ "WHERE  (ngayLap > ?) AND (ngayLap < ?)";
 			PreparedStatement preparedStatement = con.prepareStatement(sql);
 			preparedStatement.setString(1, tuNgay); 
 			preparedStatement.setString(2, denNgay);	
 			ResultSet rs = preparedStatement.executeQuery();
 			while (rs.next()) {
-				String maHoaDon = rs.getString(1);
-				Date ngay = rs.getDate(4);
-				Float gia = rs.getFloat(7);
-				HoaDon hd = new HoaDon(maHoaDon, new NhanVien(rs.getString(2)), new KhachHang(rs.getString(3)), (java.sql.Date) ngay, 
-						new ChiTietHoaDon(new SanPham(rs.getString(5), rs.getString(6),gia)));
+				String maHoaDon = rs.getString("maHD");
+				String maNV = rs.getString("maNV");
+				String maKH = rs.getString("maKH");
+				Date ngayLap = rs.getDate("ngayLap");
+				HoaDon hd = new HoaDon(maHoaDon, new NhanVien(maNV), new KhachHang(maKH), ngayLap);
 				dshd.add(hd);
 			}
 		}
@@ -130,11 +127,11 @@ public class ThongKe_DAO {
 		try {
 			ConnectDB.getInstance();
 			Connection con = ConnectDB.getConnection(); 
-			String sql = "Select SUM(gia)"
-					+ "  FROM ChiTietHoaDon INNER JOIN\r\n"
-					+ "  HoaDon ON ChiTietHoaDon.maHD = HoaDon.maHD INNER JOIN\r\n"
-					+ "  SanPham ON ChiTietHoaDon.maSP = SanPham.maSP INNER JOIN\r\n"
-					+ "where ngayLap > ? and ngayLap < ?";
+			String sql = "SELECT SUM(SanPham.gia) AS Expr1\r\n"
+					+ "FROM     ChiTietHoaDon INNER JOIN\r\n"
+					+ "                  HoaDon ON ChiTietHoaDon.maHD = HoaDon.maHD INNER JOIN\r\n"
+					+ "                  SanPham ON ChiTietHoaDon.maSP = SanPham.maSP\r\n"
+					+ "WHERE  (HoaDon.ngayLap > ?) AND (HoaDon.ngayLap < ?)";
 			PreparedStatement pst = con.prepareStatement(sql);
 			pst.setString(1,tuNgay);
 			pst.setString(2,denNgay);
@@ -146,5 +143,36 @@ public class ThongKe_DAO {
 			e.printStackTrace();
 		}
 		return sum;
+	}
+	
+	public boolean xoaHD(String maHD) {
+		// TODO Auto-generated method stub
+		ConnectDB.getInstance();
+		Connection con = ConnectDB.getConnection();
+		PreparedStatement stmt = null;
+		int n = 0;
+		try {
+			stmt = con.prepareStatement("DELETE FROM ChiTietHoaDon INNER JOIN\r\n"
+					+ "HoaDon ON ChiTietHoaDon.maHD = HoaDon.maHD\r\n"
+					+ "WHERE HoaDon.maHD=?");
+			stmt.setString(1, maHD);
+			n = stmt.executeUpdate();
+			if(n==0) {
+				return true;
+			}
+			else
+				return false;
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return false;
+		}finally {
+			try {
+				stmt.close();
+			} catch (SQLException e) { e.printStackTrace();
+				// TODO: handle exception
+			}
+		}
 	}
 }

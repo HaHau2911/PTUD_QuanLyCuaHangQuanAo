@@ -153,7 +153,7 @@ public class ThongTinKhachHang extends JFrame implements ActionListener{
 		
 		
 		btnLamMoi = new JButton("Làm mới");
-		btnLamMoi.setIcon(new ImageIcon("Icon/xoarong.png"));
+		btnLamMoi.setIcon(new ImageIcon("Icon/load.png"));
 		btnLuu = new JButton("Lưu");
 		btnLuu.setIcon(new ImageIcon("Icon/save.png"));
 		btnThoat = new JButton("Thoát");
@@ -167,8 +167,8 @@ public class ThongTinKhachHang extends JFrame implements ActionListener{
 		btnLamMoi.addActionListener(this);
 		btnThoat.addActionListener(this);
 		
-		/* if (flag == true) {
-			dinhDangMaNhaCungCap();
+		if (flag == true) {
+			dinhDangMaKhacHang();
 			txtTenKH.setText("");
 			txtEmail.setText("");
 			txtDiaChi.setText("");
@@ -182,7 +182,7 @@ public class ThongTinKhachHang extends JFrame implements ActionListener{
 			txtDiaChi.setText(khachhang.getDiaChi());
 			txtSDT.setText(khachhang.getSoDT());
 			txtCMND.setText(khachhang.getCmnd());
-		} */
+		} 
 		btnLuu.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -195,13 +195,20 @@ public class ThongTinKhachHang extends JFrame implements ActionListener{
 						String DiaChi = txtDiaChi.getText().trim();
 						String SDT = txtSDT.getText().trim();
 						String cmnd = txtCMND.getText().trim();
-						khachhang = new KhachHang(maKH, tenKH, email, DiaChi, SDT, cmnd, rootPaneCheckingEnabled);
+						
+						boolean gioiTinh = true;
+						if(radNu.isSelected())
+							gioiTinh = false;
+						
+						khachhang = new KhachHang(maKH, tenKH, email, DiaChi, SDT, cmnd, gioiTinh);
 						if(kh_dao.themKH(khachhang))
 						{
 							JOptionPane.showMessageDialog(null , "Thêm thành công","Thông báo",JOptionPane.INFORMATION_MESSAGE);
 							qlkh.modeltable.addRow(new Object[] {
-									maKH, tenKH, email, DiaChi, SDT, cmnd, rootPaneCheckingEnabled
+									maKH, tenKH, email, DiaChi, SDT, cmnd, gioiTinh
 							});
+							xoaRong();
+							dinhDangMaKhacHang();;
 						}
 						dispose();
 					}			
@@ -214,7 +221,12 @@ public class ThongTinKhachHang extends JFrame implements ActionListener{
 						String DiaChi = txtDiaChi.getText().toString();
 						String SDT = txtSDT.getText().toString();
 						String cmnd = txtCMND.getText().toString();
-						khachhang = new KhachHang(maKH, tenKH, email, DiaChi, SDT, cmnd, rootPaneCheckingEnabled);
+						
+						boolean gioiTinh = true;
+						if(radNu.isSelected())
+							gioiTinh = false;
+						
+						khachhang = new KhachHang(maKH, tenKH, email, DiaChi, SDT, cmnd, gioiTinh);
 						
 						if(kh_dao.update(khachhang)) {
 							qlkh.table.setValueAt(txtTenKH.getText(), qlkh.row, 1);
@@ -222,6 +234,7 @@ public class ThongTinKhachHang extends JFrame implements ActionListener{
 							qlkh.table.setValueAt(txtDiaChi.getText(),qlkh.row,3);
 							qlkh.table.setValueAt(txtSDT.getText(),qlkh.row,4);
 							qlkh.table.setValueAt(txtCMND.getText(),qlkh.row,5);
+							
 						}
 					}
 					JOptionPane.showMessageDialog(null , "Sửa thành công","Thông báo",JOptionPane.INFORMATION_MESSAGE);
@@ -246,6 +259,7 @@ public class ThongTinKhachHang extends JFrame implements ActionListener{
 			txtDiaChi.setText("");
 			txtSDT.setText("");
 			txtCMND.setText("");
+			radNam.setSelected(true);
 		}
 		else if (o.equals(btnThoat)) {
 			int kt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn thoát không","Thông báo",JOptionPane.YES_NO_OPTION);
@@ -259,15 +273,64 @@ public class ThongTinKhachHang extends JFrame implements ActionListener{
 		txtMess.setText(message);
 	}
 	private boolean validData() {
-		String tenNCC = txtTenKH.getText().trim();
-		if(!(tenNCC.length() > 0))
-		{
-			showMessage("Error: Tên khách hàng không được rỗng", txtTenKH);
+		String tenKH = txtTenKH.getText();
+		String cmnd = txtCMND.getText();
+		String diaChi = txtDiaChi.getText();
+		String email = txtEmail.getText();
+		String sdt = txtSDT.getText();
+		if(!(tenKH.length()>0)){
+
+			JOptionPane.showMessageDialog(null, "Tên nhân viên không trống " );
+		
 			return false;
 		}
-		return true;
+//		}
+		if(!(cmnd.length()>0 && cmnd.matches("\\d{9}"))) {
+			JOptionPane.showMessageDialog(null, "Chứng minh nhân dân gồm  9 số");
+			return false;
+		}
+		if(!(diaChi.length()>0)) {
+			JOptionPane.showMessageDialog(null, "Địa chỉ không được để trống " );
+			return false;
+		}
+		if(! diaChi.matches("^[0-9a-zA-Z_ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶ\" +\r\n" + 
+				"	            \"ẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợ\" +\r\n" + 
+				"	            \"ụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\\\s/\\\\.,]+$")){
+			JOptionPane.showMessageDialog(null, "Địa chỉ không hợp lệ " );
+			return false;
+	            }
+		if(!(email.length()>0 )) {
+			JOptionPane.showMessageDialog(null, "Email không được để trống");
+			return false;
+		}
+		if( !email.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+				+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
+			JOptionPane.showMessageDialog(null, "Email sai cú pháp");
+			return false;
+		}
+		if(!(sdt.length()>0 )) {
+			JOptionPane.showMessageDialog(null, "Số điện thoại không được bỏ trống");
+			return false;
+		}
+		if(!(sdt.matches("^[0][1-9][0-9]{8}$"))) {
+			JOptionPane.showMessageDialog(null, "Số điện thoại gồm 10 kí tự số và bắt đầu từ kí tự 0");
+			return false;
+		}
+		return rootPaneCheckingEnabled;
+		
 	}
-	private void dinhDangMaNhaCungCap() {
+	
+	public void xoaRong() {
+		txtMaKH.setText("");
+		txtTenKH.setText("");
+		txtEmail.setText("");
+		txtCMND.setText("");
+		txtDiaChi.setText("");
+		txtSDT.setText("");
+		radNam.setSelected(true);
+    }
+	
+	private void dinhDangMaKhacHang() {
 		int makh= kh_dao.LayMaKHLonNhat()+1;
 		txtMaKH.setText("KH000"+makh);
 	}

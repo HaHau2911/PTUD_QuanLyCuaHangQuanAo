@@ -68,8 +68,16 @@ public class KhachHang_DAO {
 				String cmnd = rs.getString(6);
 				boolean gioiTinh = rs.getBoolean(7);
 
-				KhachHang kh = new KhachHang(maKH, tenKH, email, diaChi, soDT, cmnd, gioiTinh);
-				dsKH.add(kh);
+				if(rs.getBoolean(7) == false) {
+					KhachHang kh = new KhachHang(maKH, tenKH, email, diaChi, soDT, cmnd, gioiTinh);
+					dsKH.add(kh);
+				}
+				else {
+					KhachHang kh = new KhachHang(maKH, tenKH, email, diaChi, soDT, cmnd, gioiTinh);
+					dsKH.add(kh);
+				}
+				
+				
 
 			}
 		} catch (SQLException e) {
@@ -147,9 +155,9 @@ public class KhachHang_DAO {
 			stmt = con.prepareStatement("insert into KhachHang values(?,?,?,?,?,?,?)");
 			stmt.setString(1, kh.getMaKH());
 			stmt.setString(2, kh.getTenKH());
-			stmt.setString(6, kh.getEmail());
-			stmt.setString(3, kh.getDiaChi());
-			stmt.setString(4, kh.getCmnd());
+			stmt.setString(3, kh.getEmail());
+			stmt.setString(4, kh.getDiaChi());
+			stmt.setString(6, kh.getCmnd());
 			stmt.setString(5, kh.getSoDT());
 			stmt.setBoolean(7, kh.getGioiTinh());
 			n = stmt.executeUpdate();
@@ -176,15 +184,14 @@ public class KhachHang_DAO {
 					"update KhachHang set tenKH=?,CMND=?,diaChi=?,email=?,soDT=?,gioiTinh=? where maKH=?");
 			stmt.setString(7, kh.getMaKH());
 			stmt.setString(1, kh.getTenKH());
-			stmt.setString(2, kh.getSoDT());
-			stmt.setString(3, kh.getEmail());
-			stmt.setString(4, kh.getCmnd());
-			stmt.setString(5, kh.getDiaChi());
+			stmt.setString(5, kh.getSoDT());
+			stmt.setString(4, kh.getEmail());
+			stmt.setString(2, kh.getCmnd());
+			stmt.setString(3, kh.getDiaChi());
 			stmt.setBoolean(6, kh.getGioiTinh());
 			n = stmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
-
 		}
 		return n > 0;
 	}
@@ -218,11 +225,18 @@ public class KhachHang_DAO {
 
 		Statement statement = con.createStatement();
 		ResultSet rs = statement.executeQuery(sql);
-
 		while (rs.next()) {
-			Object[] o = { rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
-					rs.getString(6), rs.getString(7) };
-			tableModel.addRow(o);
+			
+			if(rs.getBoolean(7) == false) {
+				Object[] o = { rs.getString(1), rs.getString(2), rs.getString(3),
+						rs.getString(4), rs.getString(5), rs.getString(6),"Nữ"};
+				tableModel.addRow(o);
+			}
+			else {
+				Object[] o = { rs.getString(1), rs.getString(2), rs.getString(3),
+						rs.getString(4), rs.getString(5), rs.getString(6),"Nam"};
+				tableModel.addRow(o);
+			};
 		}
 		return tableModel;
 	}

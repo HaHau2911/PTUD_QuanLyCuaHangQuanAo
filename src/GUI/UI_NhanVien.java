@@ -33,7 +33,9 @@ import javax.swing.table.DefaultTableModel;
 
 import DAO.LoaiNhanVien_DAO;
 import DAO.NhanVien_DAO;
+import connectDB.ConnectDB;
 import entity.LoaiNhanVien;
+import entity.NhaCungCap;
 import entity.NhanVien;
 
 
@@ -44,24 +46,26 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 	JTable table;
 	
 	JLabel lblMaNV, lblTenNV, lblEmail, lblDiaChi, lblSDT, lblCMND, lblNVL, lblUser, lblPass, lblGioiTinh, lblTrangThai,lblChuThich1,lblChuThich2;
-	JTextField txtMaNV, txtTenNV, txtEmail, txtDiaChi, txtSDT, txtCMND,txtNVL;
+	JTextField txtMaNV, txtTenNV, txtEmail, txtDiaChi, txtSDT, txtCMND,txtLNV, txtMess;
 	ButtonGroup btnGroup;
 	JRadioButton radNam, radNu,radDangLam,radNghi;
-	JButton btnThem, btnXoa, btnUpdate,btnThoat;
+	JButton btnThem, btnXoa, btnUpdate;
 	JPanel pnNorth;
 	JPanel pnMain;
 	JComboBox<NhanVien> cbxTrangThai,cbGioiTinh;
-
+	private JButton btnLamMoi, btnLuu, btnThoat;
 	private javax.swing.JTable tblNhanVien;
 	private javax.swing.JScrollPane jScrollPane1;
 	ImageIcon background;
 	private NhanVien_DAO dao_nv = new NhanVien_DAO();	
-	private UI_ThongTinNhanVien ttnv = new UI_ThongTinNhanVien();
+	private UI_ThongTinNhanVien ttnv;
 	private JComboBox cboLoaiNV;
 	private ArrayList<LoaiNhanVien> lstLoaiNV;
 	private LoaiNhanVien_DAO loaiNV_dao;
-	private ArrayList<NhanVien> lstNV;
+	private NhanVien nhanvien;
 	private NhanVien_DAO nv_dao;
+	boolean flag = true;
+	
 	//private JDateChooser dateNgayVaoLam;
 	/*
 	@Override
@@ -73,8 +77,17 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 	{
 		this.background=img;
 	}*/
-	public UI_NhanVien()  {
-		setTitle("Thong Tin Nhan Vien");
+	public UI_NhanVien(NhanVien nv, boolean flag)  {
+		try {
+			ConnectDB.getInstance().connect();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		nv_dao = new NhanVien_DAO();
+		nhanvien = nv;
+		ttnv = new UI_ThongTinNhanVien();
+		
+		setTitle("Thông Tin Nhân Viên");
 		setDefaultCloseOperation(this.DISPOSE_ON_CLOSE);	
 		setSize(500,500);
 		setLocationRelativeTo(null);
@@ -124,7 +137,8 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
         
 		JPanel pnMaNV = new JPanel();
 		lblMaNV = new JLabel("Mã nhân viên");
-		txtMaNV = new JTextField(18);
+		txtMaNV = new JTextField(25);
+		txtMaNV.setEnabled(false);
 		pnMaNV.add(lblMaNV);
 		pnMaNV.add(txtMaNV);
 		pnThongTin.add(pnMaNV);
@@ -132,21 +146,21 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 			//Ten
 		JPanel pnTenNV = new JPanel();
 		lblTenNV = new JLabel("Tên nhân viên");
-		txtTenNV = new JTextField(18);
+		txtTenNV = new JTextField(25);
 		pnTenNV.add(lblTenNV);
 		pnTenNV.add(txtTenNV);
 		pnThongTin.add(pnTenNV);
 		//Email
 		JPanel pnEmail = new JPanel();
 		lblEmail = new JLabel("Email");
-		txtEmail = new JTextField(18);
+		txtEmail = new JTextField(25);
 		pnEmail.add(lblEmail);
 		pnEmail.add(txtEmail);
 		pnThongTin.add(pnEmail);
 		//DiaChi
 		JPanel pnDiaCHi = new JPanel();
 		lblDiaChi = new JLabel("Địa Chỉ");
-		txtDiaChi = new JTextField(18);
+		txtDiaChi = new JTextField(25);
 		pnDiaCHi.add(lblDiaChi);
 		pnDiaCHi.add(txtDiaChi);
 		pnThongTin.add(pnDiaCHi);
@@ -154,7 +168,7 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 		//SDT
 		JPanel pnSDT = new JPanel();
 		lblSDT = new JLabel("Số Điện Thoại");
-		txtSDT = new JTextField(18);
+		txtSDT = new JTextField(25);
 		pnSDT.add(lblSDT);
 		pnSDT.add(txtSDT);
 		pnThongTin.add(pnSDT);
@@ -162,14 +176,14 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 		//CMND
 		JPanel pnCMND = new JPanel();
 		lblCMND = new JLabel("CMND");
-		txtCMND = new JTextField(18);
+		txtCMND = new JTextField(25);
 		pnCMND.add(lblCMND);
 		pnCMND.add(txtCMND);
 		pnThongTin.add(pnCMND);
 
 			//TrangThai
 		JPanel pnTrangThai = new JPanel();
-		lblTrangThai = new JLabel("TrangThai:");
+		lblTrangThai = new JLabel("Trạng Thái:");
 		radDangLam = new JRadioButton("Đang Làm");
 		radNghi = new JRadioButton("Nghỉ");
 		ButtonGroup groupTinhTrang = new ButtonGroup();
@@ -204,11 +218,13 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 		
 		JPanel pnLoaiNV = new JPanel();
 		pnLoaiNV.setLayout(new FlowLayout(FlowLayout.LEFT)); //
-		JLabel lblLoaiNV = new JLabel("Loại NhanVien:");
+		JLabel lblLoaiNV = new JLabel("Loại Nhân Viên:");
+		LoaiNhanVien_DAO lnvDao = new LoaiNhanVien_DAO();
+		ArrayList<LoaiNhanVien> listLNV = lnvDao.layHetLoaiNhanVien();
 		cboLoaiNV = new JComboBox();
-		cboLoaiNV.addItem("LNV01 - Quản Lý");
-		cboLoaiNV.addItem("LNV02 - Thu Ngân ");
-		cboLoaiNV.addItem("LNV03 - Giao hàng ");
+		for(LoaiNhanVien lnv:listLNV) {
+			cboLoaiNV.addItem(lnv.getMaLoaiNV());
+		}
 		cboLoaiNV.setPreferredSize(txtMaNV.getPreferredSize());
 		pnLoaiNV.add(lblLoaiNV);
 		pnLoaiNV.add(cboLoaiNV);
@@ -246,7 +262,7 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 		radNghi.setPreferredSize(lblCMND.getPreferredSize());
 		
 		
-		btnThem = new JButton("Them");
+		/* btnThem = new JButton("Them");
 		btnThem.setIcon(new ImageIcon("Icon/them.png"));
 		btnXoa = new JButton("Xoa Rong");
 		btnXoa.setIcon(new ImageIcon("Icon/xoa.png"));
@@ -265,9 +281,113 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 		btnXoa.addActionListener(this);
 		btnUpdate.addActionListener(this);
 		btnThoat.addActionListener(this);
-		cboLoaiNV.addItemListener(this);
+		cboLoaiNV.addItemListener(this); */
+		
+		btnLamMoi = new JButton("Làm mới");
+		btnLamMoi.setIcon(new ImageIcon("Icon/load.png"));
+		btnLuu = new JButton("Lưu");
+		btnLuu.setIcon(new ImageIcon("Icon/save.png"));
+		btnThoat = new JButton("Thoát");
+		btnThoat.setIcon(new ImageIcon("Icon/thoat.png"));
+		
+		pnChucNang.add(btnLamMoi);
+		pnChucNang.add(btnLuu);
+		pnChucNang.add(btnThoat);
+		
+		btnLuu.addActionListener(this);
+		btnLamMoi.addActionListener(this);
+		btnThoat.addActionListener(this);
+		
+		if (flag == true) {
+			dinhDangMaNhanVien();
+			txtTenNV.setText("");
+			txtEmail.setText("");
+			txtDiaChi.setText("");
+			txtSDT.setText("");
+			txtCMND.setText("");
+		}
+		else {
+			txtMaNV.setText(nv.getMaNV());
+			txtTenNV.setText(nv.getTenNV());
+			txtEmail.setText(nv.getEmail());
+			txtDiaChi.setText(nv.getDiaChi());
+			txtSDT.setText(nv.getSoDT());
+			txtCMND.setText(nv.getCmnd());
+		}
+		btnLuu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if(flag == true) {
+					if(validData()) {
+						String ma= txtMaNV.getText();
+						String cmnd = txtCMND.getText();
+						String ten=txtTenNV.getText();
+						String diachi=txtDiaChi.getText();
+						String email= txtEmail.getText();
+						String sodt= txtSDT.getText();
+						boolean trangthai = false;
+						if(radDangLam.isSelected())
+							trangthai = true;
+						
+						boolean gioiTinh = true;
+						if(radNu.isSelected())
+							gioiTinh = false;
+						
+						LoaiNhanVien lNV = new LoaiNhanVien(cboLoaiNV.getSelectedItem().toString().trim());
+						
+						nhanvien = new NhanVien(ma, ten, email, diachi, sodt, cmnd, trangthai, gioiTinh, lNV);
+						
+						
+						if(nv_dao.themNV(nhanvien))
+						{
+							JOptionPane.showMessageDialog(null , "Thêm thành công","Thông báo",JOptionPane.INFORMATION_MESSAGE);
+							ttnv.modeltable.addRow(new Object[] {
+									ma, ten, email, diachi, sodt, cmnd, trangthai, gioiTinh, lNV
+							});
+							xoaRong();
+							dinhDangMaNhanVien();
+						}
+						
+						dispose();
+					}			
+				}
+				else if (flag == false ) {
+					if(ttnv.row>=0) {
+						String ma= txtMaNV.getText();
+						String cmnd = txtCMND.getText();
+						String ten=txtTenNV.getText();
+						String diachi=txtDiaChi.getText();
+						String email= txtEmail.getText();
+						String sodt= txtSDT.getText();
+						boolean trangthai =false;
+						if(radDangLam.isSelected())
+							trangthai =true;
+						
+						boolean gioiTinh = true;
+						if(radNu.isSelected())
+							gioiTinh = false;
+						
+						LoaiNhanVien lNV = new LoaiNhanVien(cboLoaiNV.getSelectedItem().toString().trim());
+						
+						nhanvien = new NhanVien(ma, ten, email, diachi, sodt, cmnd, trangthai, gioiTinh, lNV);
+						
+						if(nv_dao.update(nhanvien)) {
+							ttnv.table.setValueAt(txtTenNV.getText(), ttnv.row, 1);
+							ttnv.table.setValueAt(txtEmail.getText(),ttnv.row,2);
+							ttnv.table.setValueAt(txtDiaChi.getText(),ttnv.row,3);
+							ttnv.table.setValueAt(txtSDT.getText(),ttnv.row,4);
+							ttnv.table.setValueAt(txtCMND.getText(),ttnv.row,5);
+						}
+					}
+					JOptionPane.showMessageDialog(null , "Sửa thành công","Thông báo",JOptionPane.INFORMATION_MESSAGE);
+					dispose();
+				}	
+			}
+		});
 
-		txtMaNV.addKeyListener(new KeyAdapter() {
+		
+		/* txtMaNV.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				
@@ -295,16 +415,13 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 			}
 			
 			}
-		});
+		}); */
 	
 
 
 	}
 
 	public static void main(String[] args) {
-		UI_NhanVien ttnv = new UI_NhanVien();
-		//ttnv.setBackground(new ImageIcon("Icon/1767.jpg"));
-		ttnv.setVisible(true);
 
 	}
 
@@ -322,7 +439,7 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		Object o = e.getSource();
+		/* Object o = e.getSource();
 		if(o.equals(btnThem)) {
 			if(validData()) {
 			int row = ttnv.table.getSelectedRow();
@@ -401,11 +518,33 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 		else if(o.equals(btnThoat)) {
 			setVisible(false);
 			dispose();
+		}*/
+		Object o = e.getSource();
+		if (o.equals(btnLamMoi)) {
+			txtMaNV.setText("");
+			txtTenNV.setText("");
+			txtEmail.setText("");
+			txtCMND.setText("");
+			txtDiaChi.setText("");
+			txtSDT.setText("");
+			radNam.setSelected(true);
+		}
+		else if (o.equals(btnThoat)) {
+			int kt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn thoát không","Thông báo",JOptionPane.YES_NO_OPTION);
+			if(kt == JOptionPane.YES_OPTION) {
+				dispose();
+			}
 		}
 		
 		
 		
 	}
+	
+	private void showMessage(String message, JTextField txt) {
+		txt.requestFocus();
+		txtMess.setText(message);
+	}
+	
 	private boolean validData() {
 		String tenNV = txtTenNV.getText();
 		String cmnd = txtCMND.getText();
@@ -454,16 +593,41 @@ public class UI_NhanVien extends JFrame implements ActionListener, ItemListener 
 		
 	}
 
-	public void SearchNV(String properties) throws SQLException {
-		NhanVien_DAO dao_nv = new NhanVien_DAO();
-		UI_NhanVien nv1 = new UI_NhanVien();
+	
 		
 
-	}
+	
+	public void xoaRong() {
+		txtMaNV.setText("");
+		txtTenNV.setText("");
+		txtEmail.setText("");
+		txtCMND.setText("");
+		txtDiaChi.setText("");
+		txtSDT.setText("");
+		radNam.setSelected(true);
+    }
+	
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+	private void dinhDangMaNhanVien() {
+		/* String maNCC = "";
+		maNCC += "NCC";
+		if(String.valueOf(ncc_dao.layMaNhaCungCapLonNhat()).length() == 2) {
+			maNCC += "00";
+		}
+		else if(String.valueOf(ncc_dao.layMaNhaCungCapLonNhat()).length() == 3) {
+			maNCC += "0";
+		}
+		else if(String.valueOf(ncc_dao.layMaNhaCungCapLonNhat()).length() == 1) {
+			maNCC += "";
+		}
+		maNCC += String.valueOf(ncc_dao.layMaNhaCungCapLonNhat()+1);
+		txtMaNCC.setText(maNCC); */
+		int maNV= nv_dao.LayMaNVLonNhat()+1;
+		txtMaNV.setText("NV0"+maNV);
 	}
 }

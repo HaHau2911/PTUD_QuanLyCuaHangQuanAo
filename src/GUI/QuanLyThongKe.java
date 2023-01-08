@@ -19,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -32,6 +33,7 @@ import DAO.SanPham_DAO;
 import DAO.ThongKe_DAO;
 import connectDB.ConnectDB;
 import entity.HoaDon;
+import entity.NhaCungCap;
 
 
 
@@ -102,7 +104,7 @@ public class QuanLyThongKe extends JPanel implements ActionListener{
 		//tab.add(pnTab3, "Thống kê Tour theo địa danh");
 		//pnTab3.setBackground(Color.RED);
 		
-		pnVe.add(lblThongKeHoaDon = new JLabel("Tổng số hoá đơn là: "));
+		pnVe.add(lblThongKeHoaDon = new JLabel("Tổng hoá đơn là: "));
 		lblThongKeHoaDon.setFont(new Font("Tahoma", Font.BOLD, 17));
 		lblThongKeHoaDon.setForeground(Color.RED);
 		pnDT.add(lblThongKeDT = new JLabel("Tổng doanh thu là:"));
@@ -138,6 +140,8 @@ public class QuanLyThongKe extends JPanel implements ActionListener{
 		btnThongKe.setForeground(Color.BLUE);
 		btnThongKe.setIcon(new ImageIcon("Icon/IconThongKe.jpg"));
 		btnThongKe.setPreferredSize(new Dimension(150,32));
+		
+		
 //		pnKT.setLayout(new FlowLayout(FlowLayout.LEFT));
 //		pnKT.add(lblKT = new JLabel("Đến ngày:"));
 //		lblKT.setFont(new Font("Tahoma", Font.BOLD, 15));
@@ -201,9 +205,7 @@ public class QuanLyThongKe extends JPanel implements ActionListener{
 		table.removeAll();
 		listHoadon	= tk_dao.thongKeTheoNgay(tuNgay, denNgay);
 		for(HoaDon hd : listHoadon) {
-			modeltable.addRow(new Object[] {hd.getMaHD(), hd.getMaNV().getMaNV(),hd.getMaKH().getMaKH(),
-					hd.getNgayLap(),hd.getChitiethd().getMaSP().getMaSP(), hd.getChitiethd().getMaSP().getTenSP(),
-					hd.getChitiethd().getMaSP().getGia()
+			modeltable.addRow(new Object[] {hd.getMaHD(), hd.getMaNV().getMaNV(),hd.getMaKH().getMaKH(),hd.getNgayLap(),tk_dao.getGiaHD(hd.getMaHD())
 					 // sá»­a hÃ ng nÃ y
 			});
 		}
@@ -221,7 +223,7 @@ public class QuanLyThongKe extends JPanel implements ActionListener{
 			denNgay = "";
 			tuNgay = dcn.format(jdcKH.getDate());
 			denNgay= dcn.format(jdcKT.getDate());
-			lblThongKeHoaDon.setText("Tống số hoá đơn là: " + String.valueOf(tk_dao.SoLuongTheoNgay(tuNgay,denNgay)) );
+			lblThongKeHoaDon.setText("Số hoá đơn: " + String.valueOf(tk_dao.SoLuongTheoNgay(tuNgay,denNgay)) );
 			lblThongKeDT.setText("Tổng doanh thu là: " + String.valueOf(tk_dao.TongDTtheoNgayChon(tuNgay,denNgay)) + " VND");
 			try {
 				loadTK();
@@ -232,12 +234,15 @@ public class QuanLyThongKe extends JPanel implements ActionListener{
 			
 		}
 		
-		if(o.equals(btnLoad)) {
+		else if(o.equals(btnLoad)) {
 			
 
 			loadHoaDon();
-			lblThongKeHoaDon.setText("Tống số hoá đơn là: " + 0 );
+			lblThongKeHoaDon.setText("Tống hoá đơn là: " + 0 );
 			lblThongKeDT.setText("Tổng doanh thu là: " + 0);
 		}
+		
+
+		
 	}
 }

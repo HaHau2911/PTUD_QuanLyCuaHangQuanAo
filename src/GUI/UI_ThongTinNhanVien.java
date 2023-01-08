@@ -9,13 +9,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -23,19 +27,26 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import DAO.KhachHang_DAO;
 import DAO.NhanVien_DAO;
 import connectDB.ConnectDB;
+import entity.NhanVien;
 
 
 
-public class UI_ThongTinNhanVien extends JPanel implements ActionListener{
+public class UI_ThongTinNhanVien extends JPanel implements ActionListener, MouseListener{
 
 	DefaultTableModel modeltable;
 	JTable table;
 	JTextField txtTim;
-	JButton btnTim, btnThem, btnSua, btnLoad, btnThoat;
+	JButton btnTim, btnThem, btnSua, btnLoad, btnThoat, btnXoa;
 	protected String[] chuoi;
 	UI_NhanVien ui;
+	int row;
+	NhanVien_DAO nv_dao;
+	NhanVien nhanvien;
+	ArrayList<NhanVien> listNV;
+	DefaultTableCellNhanVien cellNhanVien;
 	public UI_ThongTinNhanVien() {
 		try {
 			ConnectDB.getInstance().connect();
@@ -44,7 +55,7 @@ public class UI_ThongTinNhanVien extends JPanel implements ActionListener{
 			e1.printStackTrace();
 		}
 		
-		
+		nv_dao = new NhanVien_DAO();
 
 		setLayout(new BorderLayout());
 		
@@ -59,7 +70,7 @@ public class UI_ThongTinNhanVien extends JPanel implements ActionListener{
 		add(pnNorth,BorderLayout.NORTH);
 		
 		
-		String[] chuoi = {"Mã nhân viên","Tên nhân viên","Email","Địa chỉ","Số điện thoại","CMND","trang thai","gioi tinh","loai nv"};
+		String[] chuoi = {"Mã nhân viên","Tên nhân viên","Email","Địa chỉ","Số điện thoại","CMND","Trạng thái","Giới tính","Loại Nhân viên"};
 		modeltable = new DefaultTableModel(chuoi,0);
 		table = new JTable(modeltable);
 		JScrollPane sc = new JScrollPane(table);
@@ -87,28 +98,32 @@ public class UI_ThongTinNhanVien extends JPanel implements ActionListener{
 		btnThem = new JButton("Thêm");
 		btnThem.setIcon(new ImageIcon("Icon/them.png"));
 		btnSua = new JButton("Sửa");
-		btnSua.setIcon(new ImageIcon("Icon/sua.png"));
+		btnSua.setIcon(new ImageIcon("Icon/repair.png"));
+		btnXoa = new JButton("Xoá");
+		btnXoa.setIcon(new ImageIcon("Icon/xoarong.png"));
 		btnLoad = new JButton("Load");
-		btnLoad.setIcon(new ImageIcon("Icon/open1.png"));
+		btnLoad.setIcon(new ImageIcon("Icon/load.png"));
 		btnThoat = new JButton("Thoát");
 		btnThoat.setIcon(new ImageIcon("Icon/thoat.png"));
 		pnRight.add(btnThem);
 		pnRight.add(btnSua);
+		pnRight.add(btnXoa);
 		pnRight.add(btnLoad);
 		pnRight.add(btnThoat);
 		pnSouth.add(sp);
 		
 		btnThem.addActionListener(this);
 		btnSua.addActionListener(this);
+		btnXoa.addActionListener(this);
 		btnThoat.addActionListener(this);
 		btnLoad.addActionListener(this);
 		
-		try {
-			loadNV();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		nhanvien = new NhanVien();
+		table.addMouseListener(this);
+		
+		modeltable.setRowCount(0);
+		listNV	= nv_dao.LayHetNhanVien();
+		
 		txtTim.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -131,21 +146,76 @@ public class UI_ThongTinNhanVien extends JPanel implements ActionListener{
 				
 			}
 		});
+		try {
+			loadNV();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		}
+		
+	public void hienThiThongTin() {
+		modeltable.setRowCount(0);
+		table.removeAll();
+		listNV	= nv_dao.LayHetNhanVien();
+		for(NhanVien nv : listNV) {
+			modeltable.addRow(new Object[] {
+					nv.getMaNV(),nv.getTenNV(),nv.getEmail(),nv.getDiaChi(),nv.getSoDT(),nv.getCmnd(),
+					nv.getTrangThai(), nv.getGioiTinh(), nv.getLoaiNV().getMaLoaiNV()
+			});	
+		}
+		JOptionPane.showMessageDialog(this, "Hiển thị thành công");
 	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
 		if(o.equals(btnThem)) {
-			
-			new UI_NhanVien().setVisible(true);
+			btnThem.setBackground(new Color(153, 255, 153));				//ĐÃ SỬA
+			btnThem.setForeground(Color.BLACK);
+			btnLoad.setBackground(null);				//ĐÃ SỬA
+			btnSua.setBackground(null);	
+			btnXoa.setBackground(null);	//ĐÃ SỬA
+			btnThoat.setBackground(null);
+			new UI_NhanVien(nhanvien,true).setVisible(true);
 		}
 		else if(o.equals(btnThoat)) {
-			setVisible(false);
-			dispose();
+			btnThoat.setBackground(new Color(153, 255, 153));
+			int kt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn thoát không","Thông báo",JOptionPane.YES_NO_OPTION);
+			if(kt == JOptionPane.YES_OPTION) {				//ĐÃ SỬA
+				System.exit(0);
+			}
+		}
+		else if(o.equals(btnXoa)) {
+			btnXoa.setBackground(new Color(153, 255, 153));	
+			
+			int r =  table.getSelectedRow();
+			if (r == -1) {
+				JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng cần xóa !!");
+				return;
+			}
+			int result = JOptionPane.showConfirmDialog(this,"Bạn có chắc sẽ xóa dòng này không !!","Cảnh báo",
+					JOptionPane.YES_NO_OPTION,JOptionPane.WARNING_MESSAGE);
+			if (result ==0) {
+				String maNV = modeltable.getValueAt(r, 0).toString();
+				ArrayList<NhanVien> listnv = nv_dao.LayHetNhanVien();
+				for(NhanVien nv : listnv) {
+					if (nv.getMaNV().equalsIgnoreCase(maNV)) {
+							modeltable.removeRow(r);
+							nv_dao.xoaNV(maNV);
+					}
+				}
+			}
 		}
 		else if(o.equals(btnSua)) {
-			new UI_NhanVien().setVisible(true);
+			btnSua.setBackground(new Color(153, 255, 153));			//ĐÃ SỬA
+			btnLoad.setBackground(null);				//ĐÃ SỬA
+			btnThem.setBackground(null);	
+			btnXoa.setBackground(null);	//ĐÃ SỬA
+			btnThoat.setBackground(null);
+			new UI_NhanVien(nhanvien,false).setVisible(true);
 		}
 		else if(o.equals(btnLoad)) {
 			NhanVien_DAO dao_nv = new NhanVien_DAO();
@@ -164,6 +234,26 @@ public class UI_ThongTinNhanVien extends JPanel implements ActionListener{
 		// TODO Auto-generated method stub
 		
 	}
+	private void xoahetDLTrongTable() {
+		// TODO Auto-generated method stub
+		DefaultTableModel dtm = (DefaultTableModel) table.getModel();
+		dtm.getDataVector().removeAllElements();
+	}
+	
+	private void DocDuLieuDataBaseVaoTable() {
+		// TODO Auto-generated method stub
+		modeltable.setRowCount(0);
+		table.removeAll();
+		listNV	= nv_dao.LayHetNhanVien();
+		for(NhanVien nv : listNV) {
+			modeltable.addRow(new Object[] {
+					nv.getMaNV(),nv.getTenNV(),nv.getEmail(),nv.getDiaChi(),nv.getSoDT(),nv.getCmnd(),
+					nv.getTrangThai(), nv.getGioiTinh(), nv.getLoaiNV().getMaLoaiNV()
+			});	
+		}
+		
+	}
+	
 	private void loadNV() throws SQLException {
 		NhanVien_DAO dao_nv = new NhanVien_DAO();
 		modeltable= dao_nv.getAllNV();
@@ -195,6 +285,37 @@ public class UI_ThongTinNhanVien extends JPanel implements ActionListener{
 
 	}
 	protected void setExtendedState(int maximizedBoth) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		row = table.getSelectedRow();
+		nhanvien.setMaNV(table.getValueAt(row, 0).toString());
+		nhanvien.setTenNV(table.getValueAt(row, 1).toString());
+		nhanvien.setEmail(table.getValueAt(row, 2).toString());
+		nhanvien.setDiaChi(table.getValueAt(row, 3).toString());
+		nhanvien.setSoDT(table.getValueAt(row, 4).toString());
+		nhanvien.setCmnd(table.getValueAt(row, 5).toString());
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

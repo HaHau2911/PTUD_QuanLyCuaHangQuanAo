@@ -9,6 +9,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 public class DefaultTableCellSanPham extends DefaultTableCellRenderer implements TableCellRenderer{
+	public DefaultTableCellSanPham() {
+	}
 
 	DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer();
 	SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");

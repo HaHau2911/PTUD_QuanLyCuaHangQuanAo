@@ -200,6 +200,9 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 		cboNCC = new JComboBox();
 		cboLoaiSP = new JComboBox();
 		txtMaSP = new JTextField(18);
+		SanPham_DAO sanphamDao = new SanPham_DAO();
+		int maSPLN = sanphamDao.LayMaSPLonNhat();
+		txtMaSP.setText("SP0"+maSPLN);
 		txtMaSP.setEditable(false);
 		txtTenSP = new JTextField(18);
 		radTrue = new JRadioButton("Có thể đặt",true); 
@@ -263,13 +266,13 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 		else if(l==2)
 		{
 			DuaThongTinSPVaoComponent();
-			btnLuu.setVisible(false);
+			btnLuu.setVisible(true);
 		}
 		else
 		{
 			btnLuu.setVisible(true);
-			DinhDangMaSanPham();
-			DinhDangTenSP();
+//			DinhDangMaSanPham();
+//			DinhDangTenSP();
 		}
 			
 	}
@@ -293,7 +296,7 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 	private void ThemVaoCboNhaCungCap()
 	{
 		for (NhaCungCap ncc : nhacungcap_dao.getalltbNCC()) {
-			cboNCC.addItem(ncc.getMaNCC()+"-"+ncc.getTenNCC());
+			cboNCC.addItem(ncc.getMaNCC());
 		}
 	}
 	
@@ -302,7 +305,7 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 	}
 	private void ThemVaoCboLoaiSP() {
 		for (LoaiSanPham loaiSP : lstLoaiSP) {
-			cboLoaiSP.addItem(loaiSP.getMaLoaiSP()+"-"+loaiSP.getTenLoaiSP());
+			cboLoaiSP.addItem(loaiSP.getMaLoaiSP()/*+"-"+loaiSP.getTenLoaiSP()*/);
 		}
 	}
 	
@@ -346,7 +349,7 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 			try {
 				in = new FileInputStream(DinhDanhLaiNguonAnh(hinhAnh));
 				System.out.println(XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)));
-				FileOutputStream ou = new FileOutputStream("HinhAnhTour\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)));
+				FileOutputStream ou = new FileOutputStream("hinhAnh\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)));
 				BufferedInputStream bin = new BufferedInputStream(in);
 				BufferedOutputStream bou = new BufferedOutputStream(ou);
 				int b= 0;
@@ -398,9 +401,9 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 	}
 	private void DinhDangTenSP() {
 		String tenSP="";
-		tenSP+="Tour ";
+		tenSP+="";
 		tenSP+=cboLoaiSP.getSelectedItem().toString().substring(3)+" ";
-		tenSP+=cboNCC.getSelectedItem().toString().substring(7)+" ";
+//		tenSP+=cboNCC.getSelectedItem().toString().substring(7)+" ";
 		if(String.valueOf(sp_dao.LayMaSPLonNhat()).length()==2)
 			tenSP+="0";
 		tenSP+=String.valueOf(sp_dao.LayMaSPLonNhat()+1);
@@ -554,12 +557,12 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 			if(l==1) { // 1 là thêm
 				if(KiemTraNhapLieu()) {
 				
-					NhaCungCap ncc = new NhaCungCap(cboNCC.getSelectedItem().toString().substring(0,6));
-					LoaiSanPham lSP = new LoaiSanPham(cboLoaiSP.getSelectedItem().toString().substring(0,2));
+					NhaCungCap ncc = new NhaCungCap(cboNCC.getSelectedItem().toString().trim());
+					LoaiSanPham lSP = new LoaiSanPham(cboLoaiSP.getSelectedItem().toString().trim());
 					SanPham SPThem = null;
 					try {
 						SPThem = new SanPham(txtMaSP.getText(), txtTenSP.getText(),Float.parseFloat(txtGia.getText()), taMoTa.getText(), true ,
-								"HinhAnhTour\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)), lSP,Integer.parseInt(txtSoLuong.getText()), ncc);	
+								"hinhAnh\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)), lSP,Integer.parseInt(txtSoLuong.getText()), ncc);	
 					} catch (Exception e2) {
 						JOptionPane.showMessageDialog(this, "Không thể tạo sản phẩm");
 					}
@@ -578,81 +581,30 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 					}
 				}
 			}
-			else if(l==0) { // Sửa thông tin
+			else if(l==2) { // Sửa thông tin
 				if(KiemTraNhapLieu()) {
-					if(!t.getMaSP().equals(txtMaSP.getText())) { // Nếu khác thì phải new 1 tour mới, r xóa tour cũ
 					
-							NhaCungCap ncc = new NhaCungCap(cboNCC.getSelectedItem().toString().substring(0,6));
-							LoaiSanPham lSP = new LoaiSanPham(cboLoaiSP.getSelectedItem().toString().substring(0,2));
-							SanPham SPThem = null;
-							try {
-								if(t.getHinhAnh().equals("HinhAnhTour\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)))) // Vinh - 2-6
-								{
-									JOptionPane.showMessageDialog(this,DinhDanhLaiNguonAnh("HinhAnhTour\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(t.getHinhAnh()))+"VINH"));
-									SPThem = new SanPham(txtMaSP.getText(), txtTenSP.getText(),Float.parseFloat(txtGia.getText()), taMoTa.getText(), true ,
-											"HinhAnhTour\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)), lSP,Integer.parseInt(txtSoLuong.getText()), ncc);	
-								}
-								else
-								{
-									JOptionPane.showMessageDialog(this,DinhDanhLaiNguonAnh( t.getHinhAnh())+"THÀNH"+"\n"+"HinhAnhTour\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)));
-									SPThem = new SanPham(txtMaSP.getText(), txtTenSP.getText(),Float.parseFloat(txtGia.getText()), taMoTa.getText(), true ,
-											"HinhAnhTour\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)), lSP,Integer.parseInt(txtSoLuong.getText()), ncc);	
-								}
-							} catch (Exception e2) {
-								JOptionPane.showMessageDialog(this, "Không thể tạo sản phẩm");
-							}
-							
-							try {
-								sp_dao.ThemSanPham(SPThem);
-								
-								try {
-									sp_dao.XoaSP(t.getMaSP());
-								} catch (Exception e2) {
-									JOptionPane.showMessageDialog(this, "Lỗi trong khi xóa sản phẩm cũ !");
-								}
-								if(!SPThem.getHinhAnh().equals(t.getHinhAnh()))
-									LuuAnh();
-								JOptionPane.showMessageDialog(this, "Sửa thành công !");
-								QuanLySanPham.qlSP.TaiSPLen();
-								this.dispose();// Vinh - 2-6
-							} catch (Exception e2) {
-								JOptionPane.showMessageDialog(this, "Lỗi, không thể sửa!");
-							}
+					NhaCungCap ncc = new NhaCungCap(cboNCC.getSelectedItem().toString().trim());
+					LoaiSanPham lSP = new LoaiSanPham(cboLoaiSP.getSelectedItem().toString().trim());
+					SanPham SPThem = null;
+					try {
+						SPThem = new SanPham(txtMaSP.getText(), txtTenSP.getText(),Float.parseFloat(txtGia.getText()), taMoTa.getText(), true ,
+								"hinhAnh\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)), lSP,Integer.parseInt(txtSoLuong.getText()), ncc);	
+					} catch (Exception e2) {
+						JOptionPane.showMessageDialog(this, "Không thể tạo sản phẩm");
 					}
 					
-					else {//Nếu giống thì sửa bình thường
-						
-									
-						NhaCungCap ncc = new NhaCungCap(cboNCC.getSelectedItem().toString().substring(0,6));
-						LoaiSanPham lSP = new LoaiSanPham(cboLoaiSP.getSelectedItem().toString().substring(0,2));
-						SanPham SPSua =null;
-						try {
-							if(DinhDanhLaiNguonAnh(t.getHinhAnh()).equals("HinhAnhTour\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh))))
-							{
-								SPSua = new SanPham(txtMaSP.getText(), txtTenSP.getText(),Float.parseFloat(txtGia.getText()), taMoTa.getText(), true ,
-										"HinhAnhTour\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)), lSP,Integer.parseInt(txtSoLuong.getText()), ncc);	
-								
-							}
-							else
-							{
-								SPSua = new SanPham(txtMaSP.getText(), txtTenSP.getText(),Float.parseFloat(txtGia.getText()), taMoTa.getText(), true ,
-										"HinhAnhTour\\\\"+XuLyLayTenAnh(DinhDanhLaiNguonAnh(hinhAnh)), lSP,Integer.parseInt(txtSoLuong.getText()), ncc);	
-							}
-							
-						} catch (Exception e2) {
-							JOptionPane.showMessageDialog(this, "Không thể tạo sản phẩm để sửa !");
-						}
-						
-						try {
-							sp_dao.SuaSanPham(SPSua);
-							if(!SPSua.getHinhAnh().equals(t.getHinhAnh()))
-								LuuAnh();
-							JOptionPane.showMessageDialog(this, "Sửa thành công !");
-							QuanLySanPham.qlSP.TaiSPLen();
-							this.dispose();
-						} catch (Exception e2) {
-							JOptionPane.showMessageDialog(this, "Lỗi, không thể sửa!");
-						}
+					try {
+						sp_dao.SuaSanPham(SPThem);
+						LuuAnh();
+						JOptionPane.showMessageDialog(this, "Sửa sản phẩm thành công !");
+						/*sp_dao.GuiEmail(SPThem,cboNCC.getSelectedItem().toString().substring(7),
+								cboLoaiSP.getSelectedItem().toString().substring(3));
+						JOptionPane.showMessageDialog(this, "Đã gửi mail !");*/
+						QuanLySanPham.qlSP.TaiSPLen();
+						this.dispose();
+					} catch (Exception e2) {
+						JOptionPane.showMessageDialog(this, "Lỗi, không thể thêm sản phẩm!");
 					}
 				}
 			}
@@ -674,7 +626,7 @@ public class NhapSuaThongTinSanPham extends JFrame implements ActionListener, It
 			}
 		}
 		
-		else if(l==0) {// 0 là sửa
+		else if(l==2) {// 0 là sửa
 			if(obj.equals(cboLoaiSP)&&e.getStateChange()==ItemEvent.SELECTED) {
 				DinhDangMaSPDeSua();
 				DinhDangTenSPDeSua();

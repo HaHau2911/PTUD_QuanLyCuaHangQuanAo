@@ -1,207 +1,265 @@
 package GUI;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.awt.Font;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
+import javax.swing.plaf.synth.Region;
+import javax.swing.table.DefaultTableModel;
 
-import DAO.HoaDon_DAO;
-import DAO.LoaiSanPham_DAO;
-import DAO.NhaCungCap_DAO;
 import DAO.SanPham_DAO;
-import connectDB.ConnectDB;
-import entity.HoaDon;
-import entity.LoaiSanPham;
-import entity.NhaCungCap;
+import entity.GioHang;
 import entity.SanPham;
 
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import java.awt.FlowLayout;
+import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
 
-public class DanhSach_SanPham extends JPanel implements ActionListener,KeyListener{
+public class DanhSach_SanPham extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JTextField txtSoLuong;
+	private JTable table;
+	private DefaultTableModel model;
+	private SanPham_DAO sanPham_DAO;
+	private ArrayList<SanPham> lstSanPham = new ArrayList<>();
+	private JTextField txtTenSP;
+	private ArrayList<GioHang> gioHangs = new ArrayList<GioHang>();
+	private String maNhanVien;
+	private JTextField txtSoLuongTon;
 
-	public static DanhSach_SanPham qlSP;
-	private NhaCungCap_DAO ncc_dao;
-	private SanPham_DAO sp_dao;
-	private HoaDon_DAO hd_dao;
-	
-	ArrayList<NhaCungCap> listNCC;
-	ArrayList<SanPham> listSP;
-	ArrayList<HoaDon> listHD;
-	JPanel pnCenter;
-	private JButton btnLoc;
-	private JTextField txtTim;
-	private JButton btnTim;
-	private JComboBox cbxtim;
-	private JComboBox cbxgia;
-	private JComboBox cbxNCC;
-	private LoaiSanPham_DAO loaisp_dao;
- 
-	
-	public DanhSach_SanPham() {
-		try {
-			ConnectDB.getInstance().connect();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		 qlSP = this;
+	public DanhSach_SanPham(String maNV) {
+		maNhanVien = maNV;
+		sanPham_DAO = new SanPham_DAO();
+		setLayout(null);
 
-		ncc_dao = new NhaCungCap_DAO();
-		sp_dao = new SanPham_DAO();
-		hd_dao = new HoaDon_DAO();
-		loaisp_dao= new LoaiSanPham_DAO();
-		
-		setLayout(new BorderLayout());
-		JTextField txtNhap = new JTextField(15);
-		pnCenter = new JPanel();
-		pnCenter.setLayout(new WrapLayout());
-		pnCenter.setBackground(Color.white);
-		JPanel pnTab1 = new JPanel();
-		pnTab1.setLayout(new BorderLayout());
-		JPanel pnTim = new JPanel();
-		pnTim.setBackground(Color.white);
-		JLabel lblTim = new JLabel("Tìm kiếm");
-		lblTim.setIcon(new ImageIcon("Icon/find1.png"));
-		txtTim = new JTextField(25);
-		btnTim = new JButton("Tìm kiếm");
-		pnTim.add(lblTim);
-		pnTim.add(txtTim);
-		pnTim.add(btnTim);
-		//Vinh - 2-6
-		JPanel pnThem = new JPanel();
-		pnThem.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		pnThem.setBackground(Color.white);
-		btnLoc = new JButton("Lọc");
-		cbxtim = new JComboBox<>();
-		
-		cbxtim.addItem("Lọc theo loại sản phẩm");
-		for(LoaiSanPham lsp: loaisp_dao.layHetLoaiSanPham()) {
-			cbxtim.addItem(lsp.getTenLoaiSP());
+		JPanel panel = new JPanel();
+		panel.setBounds(10, 5, 969, 574);
+		add(panel);
+		panel.setLayout(null);
+
+		JLabel lblNewLabel = new JLabel("Mã sản phẩm:");
+		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblNewLabel.setBounds(85, 73, 121, 23);
+		panel.add(lblNewLabel);
+
+		JComboBox cboMaSP = new JComboBox();
+		lstSanPham = sanPham_DAO.getalltbSanPham();
+		lstSanPham.forEach(sp -> cboMaSP.addItem(sp.getMaSP()));
+		for (SanPham sp : lstSanPham) {
+			cboMaSP.addItem(sp.getMaSP());
 		}
-		
-		cbxgia = new JComboBox<>();
-		cbxgia.addItem("Sắp xếp theo giá");
-		cbxgia.addItem("Giá cao nhất");
-		cbxgia.addItem("Giá thấp nhất");
-		
-		cbxNCC = new JComboBox<>();
-		cbxNCC.addItem("Lọc theo địa danh");
-		for(NhaCungCap ncc: ncc_dao.getalltbNCC()) {
-			cbxNCC.addItem(ncc.getTenNCC());
-		}
-		//pnThem.add(cbxgia);
-		pnThem.add(cbxNCC);
-		//pnThem.add(cbxtim);
-		pnThem.add(btnLoc);
-		
-		JPanel pnNorth = new JPanel();
-		pnNorth.setLayout(new BorderLayout());
-		pnNorth.add(pnTim,BorderLayout.CENTER);
-		pnNorth.add(pnThem,BorderLayout.EAST);
-		pnTab1.add(pnNorth,BorderLayout.NORTH);
-		JScrollPane jsc1 = new JScrollPane(pnTab1);
-		pnTab1.add(pnCenter,BorderLayout.CENTER);
-		Border borderSP = BorderFactory.createLineBorder(Color.GRAY);
-		pnTab1.setBorder(borderSP);
-		add(jsc1,BorderLayout.CENTER);
-		//
-		TaiTourLen();
-		
-		btnLoc.addActionListener(this);
-		btnTim.addActionListener(this);
-		txtTim.addKeyListener(this);
-		cbxtim.addActionListener(this);
-		cbxgia.addActionListener(this);
-		
-		
-	}
-	
-	
-	public void TaiTourLen() {
-		pnCenter.removeAll();
-		pnCenter.revalidate();
-		try {  
-			listSP = sp_dao.DSTCoTheMua(ABORT); 
-			for(SanPham sanpham : listSP) { 
-				JPanel pnItem = new SanPhamTrongQuanLyHoaDon(sanpham); 
-				pnCenter.add(pnItem); 
+		cboMaSP.setBounds(216, 71, 484, 30);
+
+		panel.add(cboMaSP);
+
+		JLabel lblTnSnPhm = new JLabel("Tên sản phẩm:");
+		lblTnSnPhm.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblTnSnPhm.setBounds(85, 112, 110, 23);
+		panel.add(lblTnSnPhm);
+
+		JLabel lblNewLabel_1 = new JLabel("Số lượng:");
+		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblNewLabel_1.setBounds(85, 195, 110, 21);
+		panel.add(lblNewLabel_1);
+
+		txtSoLuong = new JTextField();
+		txtSoLuong.setBounds(216, 193, 484, 30);
+		panel.add(txtSoLuong);
+		txtSoLuong.setColumns(10);
+
+		JPanel panel_1 = new JPanel();
+		panel_1.setBackground(Color.WHITE);
+		panel_1.setBounds(0, 329, 954, 235);
+		panel.add(panel_1);
+		panel_1.setLayout(new BorderLayout(0, 0));
+
+		model = new DefaultTableModel(new Object[][] {}, new String[] { "Mã sp", "Tên sản phẩm", "Số lượng" });
+		table = new JTable(model);
+		table.setEnabled(false);
+		table.setBackground(Color.WHITE);
+
+		panel_1.add(new JScrollPane(table), BorderLayout.CENTER);
+
+		JButton btnDatHang = new JButton("Đặt hàng");
+		btnDatHang.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnDatHang.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (model.getRowCount() == 0) {
+					JOptionPane.showMessageDialog(null, "Vui lòng thêm sản phẩm");
+				} else {
+					ArrayList<GioHang> gioHangs = new ArrayList<GioHang>();
+					if (model.getRowCount() == 1) {
+						for (int i = 0; i < 1; i++) {
+							GioHang gioHang = new GioHang(model.getValueAt(i, 0).toString().trim(),
+									Integer.parseInt(model.getValueAt(i, 2).toString().trim()));
+							gioHangs.add(gioHang);
+						}
+					} else if (model.getRowCount() == 2) {
+						for (int i = 0; i < 2; i++) {
+							GioHang gioHang = new GioHang(model.getValueAt(i, 0).toString().trim(),
+									Integer.parseInt(model.getValueAt(i, 2).toString().trim()));
+							gioHangs.add(gioHang);
+						}
+					} else if (model.getRowCount() > 2) {
+						for (int i = 0; i < model.getRowCount(); i++) {
+							GioHang gioHang = new GioHang(model.getValueAt(i, 0).toString().trim(),
+									Integer.parseInt(model.getValueAt(i, 2).toString().trim()));
+							gioHangs.add(gioHang);
+						}
+					}
+
+					DatHang datHang = new DatHang(gioHangs, maNhanVien);
+					datHang.setVisible(true);
+				}
+
 			}
-			pnCenter.revalidate();		 
-		 } catch (Exception e2) { // TODO: handle exception
-		 JOptionPane.showMessageDialog(this, e2); }
-	}
-	
-	
-		private void TaiSPTimKiem(ArrayList<SanPham> sanphamTimDuoc) {
-			pnCenter.removeAll();
-			 pnCenter.revalidate();
-			for (SanPham sanpham : sanphamTimDuoc) {
-				JPanel pnItem = new SanPhamTrongQuanLyHoaDon(sanpham); 
-				pnCenter.add(pnItem);  
-				pnCenter.revalidate();
+		});
+		btnDatHang.setBounds(622, 256, 173, 41);
+		panel.add(btnDatHang);
+
+		JButton btnXoaRong = new JButton("Giảm số lượng");
+		btnXoaRong.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnXoaRong.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (txtSoLuong.getText().trim().length() == 0) {
+					JOptionPane.showMessageDialog(null, "Vui lòng nhập số lượng sản phẩm");
+				} else {
+					String masp = cboMaSP.getSelectedItem().toString().trim();
+					int a = checkTonTai(masp, model);
+					if (a == -1) {
+						JOptionPane.showMessageDialog(null, "Sản phẩm chưa được thêm vào giỏ hàng");
+					} else {
+						int sl = (Integer) model.getValueAt(a, 2) - Integer.parseInt(txtSoLuong.getText());
+						if(sl==0) {
+							model.removeRow(a);
+							table.setModel(model);
+						}
+						else if (checkSoLuong(sl, masp)) {
+							model.setValueAt(sl, a, 2);
+							table.setModel(model);
+						}
+						else
+							JOptionPane.showMessageDialog(null, "Số lượng giảm phải <= số lượng trong giỏ hàng", "Thông báo",
+									JOptionPane.INFORMATION_MESSAGE);
+					}
+				}
 			}
-			
+		});
+		btnXoaRong.setBounds(396, 256, 173, 41);
+		panel.add(btnXoaRong);
+
+		JButton btnThemSanPham = new JButton("Thêm vào giỏ hàng");
+		btnThemSanPham.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnThemSanPham.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (txtSoLuong.getText().trim().length() == 0) {
+					JOptionPane.showMessageDialog(null, "Vui lòng nhập số lượng sản phẩm");
+				} else {
+					String masp = cboMaSP.getSelectedItem().toString().trim();
+					int a = checkTonTai(masp, model);
+					if (a == -1) {
+						try {
+							int sl = Integer.parseInt(txtSoLuong.getText());
+
+							if (checkSoLuong(sl, masp)) {
+								model.addRow(new Object[] { masp, txtTenSP.getText(), sl });
+								table.setModel(model);
+							} else
+								JOptionPane.showMessageDialog(null, "Số lượng không thoả", "Thông báo",
+										JOptionPane.INFORMATION_MESSAGE);
+						} catch (Exception e1) {
+							// TODO: handle exception
+							JOptionPane.showMessageDialog(null, "Số lượng is numberic");
+						}
+
+					} else {
+						int sl = Integer.parseInt(txtSoLuong.getText()) + (Integer) model.getValueAt(a, 2);
+						if (checkSoLuong(sl, masp)) {
+							model.setValueAt(sl, a, 2);
+							table.setModel(model);
+						} else
+							JOptionPane.showMessageDialog(null, "Số lượng không thoả", "Thông báo",
+									JOptionPane.INFORMATION_MESSAGE);
+					}
+				}
+			}
+		});
+
+		btnThemSanPham.setBounds(165, 256, 173, 41);
+		panel.add(btnThemSanPham);
+
+		txtTenSP = new JTextField();
+		txtTenSP.setEnabled(false);
+		txtTenSP.setBounds(216, 111, 484, 30);
+		panel.add(txtTenSP);
+		txtTenSP.setColumns(10);
+
+		JLabel lblNewLabel_1_1 = new JLabel("Số lượng tồn:");
+		lblNewLabel_1_1.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblNewLabel_1_1.setBounds(85, 157, 121, 23);
+		panel.add(lblNewLabel_1_1);
+
+		txtSoLuongTon = new JTextField();
+		txtSoLuongTon.setEnabled(false);
+		txtSoLuongTon.setColumns(10);
+		txtSoLuongTon.setBounds(216, 151, 484, 30);
+		panel.add(txtSoLuongTon);
+
+		JPanel panel_2 = new JPanel();
+		panel_2.setBounds(0, 0, 969, 45);
+		panel.add(panel_2);
+		panel_2.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+
+		JLabel lblNewLabel_2 = new JLabel("Đặt hàng");
+		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_2.setFont(new Font("Tahoma", Font.BOLD, 26));
+		panel_2.add(lblNewLabel_2);
+
+		cboMaSP.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					String a = sanPham_DAO.getTenSp(e.getItem().toString());
+					txtTenSP.setText(a);
+					int soLuong = sanPham_DAO.getSoLuongTon(e.getItem().toString());
+					txtSoLuongTon.setText(soLuong + "");
+				}
+			}
+		});
+
+	}
+
+	public int checkTonTai(String masp, DefaultTableModel model) {
+		for (int i = 0; i < model.getRowCount(); i++) {
+			if (masp.equalsIgnoreCase(model.getValueAt(i, 0).toString().trim()))
+				return i;
 		}
-	
+		return -1;
+	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o= e.getSource();
-		if(o.equals(btnTim)) {
-			ArrayList<SanPham> sanphamTimDuoc = sp_dao.TimSP(txtTim.getText().toString().trim().toLowerCase(),false);
-			if(sanphamTimDuoc.size()==0)
-			{
-				JOptionPane.showMessageDialog(this, "Không tìm thấy!");
-			}
-			else {
-				TaiSPTimKiem(sanphamTimDuoc);
-			}	
-			
-		}else if(o.equals(btnLoc)) {
-			String mancc=cbxNCC.getSelectedItem().toString();
-			String malsp=cbxtim.getSelectedItem().toString();
-			ArrayList<SanPham> tourTimDuoc = sp_dao.TimSP(mancc,false);
-			
-			if(tourTimDuoc.size()==0)
-			{
-				JOptionPane.showMessageDialog(this, "Không tìm thấy!");
-			}
-			else {
-				TaiSPTimKiem(tourTimDuoc);
-			}	
+	public boolean checkSoLuong(int sl, String maSP) {
+		int soLuongMax = sanPham_DAO.getSoLuong(maSP);
+		if (sl > soLuongMax || sl < 0) {
+			return false;
 		}
-		
-		
-	}
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
+		return true;
 	}
 }
